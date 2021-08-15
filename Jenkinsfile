@@ -1,13 +1,13 @@
-node {
+//node {
  
-  def mvnHome
+ // def mvnHome
    
-stage('Preparation') { 
+//stage('Preparation') { 
 // for display purposes
 
       // Get some code from a GitHub repository
 
-      git 'https://github.com/raknas999/hello-world-servlet.git'
+   //   git 'https://github.com/raknas999/hello-world-servlet.git'
 
       // Get the Maven tool.
      
@@ -15,24 +15,73 @@ stage('Preparation') {
  
      // **       in the global configuration.   
         
-      mvnHome = tool 'Maven'
-   }
+    //  mvnHome = tool 'Maven'
+  // }
 
-   stage('Build') {
+//   stage('Build') {
       // Run the maven build
 
-      if (isUnix()) {
-         sh "'${mvnHome}/bin/mvn' -Dmaven.test.failure.ignore clean package"
-      } 
-      else {
-         bat(/"${mvnHome}\bin\mvn" -Dmaven.test.failure.ignore clean package/)
+   //   if (isUnix()) {
+    //     sh "'${mvnHome}/bin/mvn' -Dmaven.test.failure.ignore clean package"
+   //   } 
+    //  else {
+     //    bat(/"${mvnHome}\bin\mvn" -Dmaven.test.failure.ignore clean package/)
       
-}
-   }
+//}
+ //  }
  
-  stage('Results') {
-      junit '**/target/surefire-reports/TEST-*.xml'
-      archive 'target/*.war'
+//  stage('Results') {
+     // junit '**/target/surefire-reports/TEST-*.xml'
+    //  archive 'target/*.war'
   
- }
+// }
+//}
+
+pipeline {
+    agent any
+options { buildDiscarder(logRotator(numToKeepStr: '5')) }
+    stages {
+        stage('Checkout from git') 
+		{
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/develop']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DevopsmoningBatch/hello-world-servlet.git']]])
+            }
+        }
+		
+		stage('Maven  build') 
+		{
+            steps {
+               sh 'clean package cobertura:cobertura -Dcobertura.report.format=xml'
+            }
+        }
+		stage('Sonar quality') {
+            steps {
+               withSonarQubeEnv {
+                // some block
+          }
+            }
+        }
+		stage('Nexus upload') {
+            steps {
+                nexusPublisher nexusInstanceId: '1234', nexusRepositoryId: 'HelloWorldServlet', packages: [[$class: 'MavenPackage', mavenAssetList: [[classifier: '', extension: '', filePath: 'target/helloworld.war']], mavenCoordinate: [artifactId: 'hello-world-servlet-example', groupId: 'com.geekcap.vmturbo', packaging: 'war', version: '$BUILD_NUMBER']]]
+            }
+        }
+		stage('Deploy to tomcat') {
+            steps {
+               deploy adapters: [tomcat8(path: '', url: 'http://18.118.22.148:8080/')], contextPath: 'HelloWorldServlet', war: '**/*.war'
+            }
+        }
+		
+    }
+	post{
+	success {
+	cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: '**/target/site/cobertura/coverage.xml', conditionalCoverageTargets: '70, 0, 0', failUnhealthy: false, failUnstable: false, lineCoverageTargets: '80, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '80, 0, 0', onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
+	junit '**/target/surefire-reports/*.xml'
+	}
+	
+	}
+	failure
+	{
+	emailext body: '', subject: '', to: 'byra.pavi@gmail.com'
+	}
 }
