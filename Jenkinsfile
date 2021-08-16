@@ -80,7 +80,7 @@ options { buildDiscarder(logRotator(numToKeepStr: '5')) }
         }
 		stage('Deploy to tomcat') {
             steps {
-               deploy adapters: [tomcat8(path: '', url: 'http://18.118.22.148:8080/')], contextPath: 'HelloWorldServlet', war: '**/*.war'
+               deploy adapters: [tomcat8(path: '', url: 'http://18.222.165.216:8080/')], contextPath: 'HelloWorldServlet', war: '**/*.war'
             }
         }
 		
