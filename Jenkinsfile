@@ -94,8 +94,8 @@ options { buildDiscarder(logRotator(numToKeepStr: '5')) }
 	}
 	failure
 	{
-	emailext body: '', subject: '', to: 'byra.pavi@gmail.com'
+	mail to: "byra.pavi@gmail.com", body: "bild failed", subject: "call is failed", 
 	}
 }
-}
+
 
