@@ -61,9 +61,12 @@ stages {
       }
  }
      stage('Deploy War') {
-      steps {
-        sh label: '', script: 'ansible-playbook deploy.yml'
-      }
+     // steps {
+    //    sh label: '', script: 'ansible-playbook deploy.yml'
+     // }
+         steps {
+               deploy adapters: [tomcat8(path: '', url: 'http://13.59.157.215:8080/')], contextPath: 'HelloWorldServlet', war: '**/*.war'
+            }
  }
 }
 post {
