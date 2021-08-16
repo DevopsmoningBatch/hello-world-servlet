@@ -61,7 +61,7 @@ options { buildDiscarder(logRotator(numToKeepStr: '5')) }
          // }
           //  }
        // }
-	    stage('Sonarqube') {
+   stage('Sonarqube') {
    environment {
         scannerHome = tool 'sonarqube';
            
@@ -80,7 +80,7 @@ options { buildDiscarder(logRotator(numToKeepStr: '5')) }
         }
 		stage('Deploy to tomcat') {
             steps {
-               deploy adapters: [tomcat8(path: '', url: 'http://18.222.165.216:8080/')], contextPath: 'HelloWorldServlet', war: '**/*.war'
+               deploy adapters: [tomcat8(path: '', url: 'http://13.59.157.215:8080/')], contextPath: 'HelloWorldServlet', war: '**/*.war'
             }
         }
 		
@@ -91,10 +91,11 @@ options { buildDiscarder(logRotator(numToKeepStr: '5')) }
 	junit '**/target/surefire-reports/*.xml'
 	}
 	
-	}
+	
 	failure
 	{
-	mail to: "byra.pavi@gmail.com", body: "bild failed", subject: "call is failed", 
+	mail to: "byra.pavi@gmail.com", body: "bild failed", subject: "call is failed"
+	}
 	}
 }
 
