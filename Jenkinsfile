@@ -54,25 +54,25 @@ options { buildDiscarder(logRotator(numToKeepStr: '5')) }
                sh 'clean package cobertura:cobertura -Dcobertura.report.format=xml'
             }
         }
-		
-	    
-	     stage('Sonarqube') {
+		//stage('Sonar quality') {
+         //   steps {
+          //     withSonarQubeEnv {
+                // some block
+         // }
+          //  }
+       // }
+	    stage('Sonarqube') {
    environment {
-       def scannerHome = tool 'sonarqube';
-           def scannerHome = tool 'SonarScanner 4.0';
+        scannerHome = tool 'sonarqube';
+           
     }
     steps {
       withSonarQubeEnv('sonarqube') {
           
-      withSonarQubeEnv('Sonarname') {
-          sh "${scannerHome}/bin/sonar-scanner"
+       sh "${scannerHome}/bin/sonar-scanner"
        }
-      timeout(time: 10, unit: 'MINUTES') {
-         waitForQualityGate abortPipeline: true
-       }
+             }
     }
-   }
-	    
 		stage('Nexus upload') {
             steps {
                 nexusPublisher nexusInstanceId: '1234', nexusRepositoryId: 'HelloWorldServlet', packages: [[$class: 'MavenPackage', mavenAssetList: [[classifier: '', extension: '', filePath: 'target/helloworld.war']], mavenCoordinate: [artifactId: 'hello-world-servlet-example', groupId: 'com.geekcap.vmturbo', packaging: 'war', version: '$BUILD_NUMBER']]]
@@ -97,3 +97,5 @@ options { buildDiscarder(logRotator(numToKeepStr: '5')) }
 	emailext body: '', subject: '', to: 'byra.pavi@gmail.com'
 	}
 }
+}
+
